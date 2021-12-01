@@ -89,8 +89,8 @@ internal class Program
 
     private static async Task SynchronizeAsync()
     {
-        var serverProvider = new MariaDBSyncProvider("Server=regieprodb.mysql.database.azure.com;Port=3306;Database=staging-regiepro-sql;Uid=regieprodba;Pwd=@RegiePro2021!;ConvertZeroDateTime=True;");
-        var clientProvider = new MariaDBSyncDownloadOnlyProvider(DBHelper.GetMariadbDatabaseConnectionString("Client2"));
+        var serverProvider = new MariaDBSyncProvider(DBHelper.GetMariadbDatabaseConnectionString("Client2"));
+        var clientProvider = new MariaDBSyncDownloadOnlyProvider(DBHelper.GetConnectionString("RegiePro"));
 
         var setup = new SyncSetup(regipro_tables)
         {
