@@ -22,6 +22,7 @@ using Dotmim.Sync.MySql;
 using System.Linq;
 using Microsoft.Data.SqlClient;
 using Dotmim.Sync.MariaDB;
+using MySqlConnector;
 #if NET5_0 || NET6_0
 using MySqlConnector;
 #elif NETSTANDARD
@@ -42,73 +43,75 @@ internal class Program
 
 
     public static string[] regipro_tables = new string[] {
-    "actualites", "analytics_exchange", "analytics_group", "analytics_group_clients",
-    "analytics_group_fournisseurs", "analytics_publishing", "analytics_turnovers", "annonces", "annonces_fixed_price", "annonces_freeze",
-    "annonces_ipinfos", "annonces_metadatas", "api", "api_lesechos", "api_request", "api_tmp", "attestations", "attestations_benchmarks",
-    "attestations_signed", "avocats", "bank", "bank_banned", "bank_codes", "bank_expenses", "bank_paypal", "bank_stripe", "borne_status",
-    "cache_db", "certifications", "certifications_users", "clients", "clients_comments", "clients_metas", "clients_schemas", "clients_test",
-    "codevoie_infogreffe", "commandes", "commandes_certification", "commandes_locked", "commandes_relances", "commandes_remises_client",
-    "commandes_remises_fournisseur", "commandes_translated", "comptabilite_ecritures", "comptabilite_errors", "comptabilite_etats",
-    "comptabilite_etats_rapprochements", "comptabilite_exports", "comptabilite_params", "comptabilite_pieces", "comptabilite_rapprochements",
-    "departements", "devis", "dnid", "documents",
-    "entreprises",
-    "exchange", "exchange2", "exchange_turnovers", "expedition_freeze",
-    "export_checkpoint", "facturation_freeze", "forecast", "forfaits", "formalites", "formalites_responses", "formalites_workflows", "fournisseurs",
-    "greffes", "greffes_infogreffe", "http_auth", "huissiers", "iban", "infogreffe_unittests", "journaux", "journaux_dates_special", "journaux_favoris",
-    "journaux_fermeture", "journaux_freeze", "journaux_partenariats", "journaux_price_variations", "justificatifs", "justificatifs_numeriques",
-    "justificatifs_pages",
-    "justificatifs_papier", "justificatifs_papier_events", "medialex_api_logs", "numerotation", "open_data_bodacc", "paiements",
-    "paiements_configurations", "passwords_requests",
-    "prolegal_sessions",
-    "prospects_convert", "provisions",
-    "regiepro_sessions",
-    "reglements",
-    "relances_clients", "releves_clients", "releves_clients_pieces", "releves_com_clients", "releves_fournisseurs", "releves_fournisseurs_pieces",
-    "releves_temp", "releves_temp_pieces", "repartitions", "robot_drafts", "robot_publications", "robot_translate", "sent_emails", "sent_emails_events",
-    "sent_emails_events_metas", "sepas_order", "sip_events", "tribunaux_commerce", "tribunaux_grande_instance",
+        "actualites", "analytics_exchange", "analytics_group", "analytics_group_clients",
+        "analytics_group_fournisseurs", "analytics_publishing", "analytics_turnovers",
+        "annonces", "annonces_fixed_price", "annonces_freeze", "annonces_ipinfos", "annonces_metadatas",
+        "api", "api_lesechos", "api_request", "api_tmp", "attestations", "attestations_benchmarks",
+        "attestations_signed", "avocats", "bank", "bank_banned", "bank_codes", "bank_expenses", "bank_paypal", "bank_stripe", "borne_status",
+        "cache_db", "certifications", "certifications_users",
+        "clients", "clients_comments", "clients_metas", "clients_schemas", "clients_test",
+        "codevoie_infogreffe", "commandes", "commandes_certification", "commandes_locked", "commandes_relances", "commandes_remises_client",
+        "commandes_remises_fournisseur", "commandes_translated", "comptabilite_ecritures", "comptabilite_errors", "comptabilite_etats",
+        "comptabilite_etats_rapprochements", "comptabilite_exports", "comptabilite_params", "comptabilite_pieces", "comptabilite_rapprochements",
+        "departements", "devis", "dnid", "documents",
+        "entreprises",
+        "exchange", "exchange2", "exchange_turnovers", "expedition_freeze",
+        "export_checkpoint", "facturation_freeze", "forecast", "forfaits", "formalites", "formalites_responses", "formalites_workflows", "fournisseurs",
+        "greffes", "greffes_infogreffe", "http_auth", "huissiers", "iban", "infogreffe_unittests", "journaux", "journaux_dates_special", "journaux_favoris",
+        "journaux_fermeture", "journaux_freeze", "journaux_partenariats", "journaux_price_variations", "justificatifs", "justificatifs_numeriques",
+        "justificatifs_pages",
+        "justificatifs_papier", "justificatifs_papier_events", "medialex_api_logs", "numerotation", "open_data_bodacc", "paiements",
+        "paiements_configurations", "passwords_requests",
+        "prolegal_sessions",
+        "prospects_convert", "provisions",
+        "regiepro_sessions",
+        "reglements",
+        "relances_clients", "releves_clients", "releves_clients_pieces", "releves_com_clients", "releves_fournisseurs", "releves_fournisseurs_pieces",
+        "releves_temp", "releves_temp_pieces", "repartitions", "robot_drafts", "robot_publications", "robot_translate", "sent_emails", "sent_emails_events",
+        "sent_emails_events_metas", "sepas_order", "sip_events", "tribunaux_commerce", "tribunaux_grande_instance",
 
-    //"users_sessions", -------------------------------
+        //"users_sessions", -------------------------------
 
-    "utilisateurs",
-    "values_compare",
-    "villes",
+        "utilisateurs",
+        "values_compare",
+        "villes",
 
-    //"villes_infogreffe", ----------------------------
+        //"villes_infogreffe", ----------------------------
 
-    "zipcode_error"
+        "zipcode_error"
     };
     public static string[] oneTable = new string[] { "ProductCategory" };
 
 
     private static async Task Main(string[] args)
     {
-        await CreateSnapshotAsync();
-        //await SynchronizeAsync();
-    }
-
-
-    private static async Task SynchronizeAsync()
-    {
-        var serverProvider = new MariaDBSyncProvider(DBHelper.GetMariadbDatabaseConnectionString("Client2"));
-        var clientProvider = new MariaDBSyncDownloadOnlyProvider(DBHelper.GetConnectionString("RegiePro"));
-
+        var serverProvider = new MariaDBSyncProvider(DBHelper.GetConnectionString("RegieProStaging"));
+        var clientProvider = new MariaDBSyncDownloadOnlyProvider(DBHelper.GetMariadbDatabaseConnectionString("Client2"));
         var setup = new SyncSetup(regipro_tables)
         {
             TrackingTablesPrefix = "_sync_",
             TrackingTablesSuffix = ""
         };
-        var snapshotDirectory = Path.Combine("C:\\Tmp\\Snapshots");
+        var snapshotDirectory = Path.Combine("C:\\Tmp\\SnapshotsAdv");
         var options = new SyncOptions() { SnapshotsDirectory = snapshotDirectory };
 
         //var serverProvider = new SqlSyncProvider(DBHelper.GetDatabaseConnectionString(serverDbName));
         //var clientProvider = new SqlSyncProvider(DBHelper.GetDatabaseConnectionString(clientDbName));
         //var setup = new SyncSetup(allTables);
-        //var options = new SyncOptions() { BatchSize = 100 };
+        //var snapshotDirectory = Path.Combine("C:\\Tmp\\Snapshots");
+        //var options = new SyncOptions() { BatchSize = 100, SnapshotsDirectory = snapshotDirectory };
 
-        //var clientDatabaseName = Path.GetRandomFileName().Replace(".", "").ToLowerInvariant() + ".db";
-        //var clientProvider = new SqliteSyncProvider(clientDatabaseName);
-        //var clientProvider = new SqliteSyncDownloadOnlyProvider(clientDatabaseName);
+        await DeprovisionAsync(serverProvider, setup, options);
+        await CreateSnapshotAsync(serverProvider, setup, options);
+        await SynchronizeAsync(clientProvider, serverProvider, setup, options);
 
+        //var localOrchestrator = new LocalOrchestrator(clientProvider, options, setup);
+        //var scopeInfo = await localOrchestrator.GetClientScopeAsync();
+
+    }
+
+    private static async Task SynchronizeAsync(CoreProvider clientProvider, CoreProvider serverProvider, SyncSetup setup, SyncOptions options)
+    {
         //var options = new SyncOptions();
         // Using the Progress pattern to handle progession during the synchronization
         var progress = new SynchronousProgress<ProgressArgs>(s =>
@@ -145,23 +148,67 @@ internal class Program
 
     }
 
-    private static async Task CreateSnapshotAsync()
+    private static async Task ProvisionAsync(CoreProvider serverProvider, SyncSetup setup, SyncOptions options)
     {
-        var serverProvider = new MariaDBSyncProvider("Server=regieprodb.mysql.database.azure.com;Port=3306;Database=staging-regiepro-sql;Uid=regieprodba;Pwd=@RegiePro2021!;ConvertZeroDateTime=True;");
-        var clientProvider = new MariaDBSyncDownloadOnlyProvider(DBHelper.GetMariadbDatabaseConnectionString("Client2"));
-        var setup = new SyncSetup(regipro_tables)
+        var snapshotProgress = new SynchronousProgress<ProgressArgs>(pa =>
         {
-            TrackingTablesPrefix = "_sync_",
-            TrackingTablesSuffix = ""
-        };
-        var snapshotDirectory = Path.Combine("C:\\Tmp\\Snapshots");
-        var options = new SyncOptions() { BatchSize = 50000, SnapshotsDirectory = snapshotDirectory };
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine($"{pa.ProgressPercentage:p}\t {pa.Message}");
+            Console.ResetColor();
+        });
 
-        //var serverProvider = new SqlSyncProvider(DBHelper.GetDatabaseConnectionString(serverDbName));
-        //var setup = new SyncSetup(allTables);
-        //var snapshotDirectory = Path.Combine(SyncOptions.GetDefaultUserBatchDiretory());
-        //var options = new SyncOptions() { BatchSize = 10000, SnapshotsDirectory = snapshotDirectory };
+        Console.WriteLine($"Provision");
 
+        var remoteOrchestrator = new RemoteOrchestrator(serverProvider, options, setup);
+
+        try
+        {
+            Stopwatch stopw = new Stopwatch();
+            stopw.Start();
+
+            await remoteOrchestrator.ProvisionAsync(progress: snapshotProgress);
+
+            stopw.Stop();
+            Console.WriteLine($"Total duration :{stopw.Elapsed:hh\\.mm\\:ss\\.fff}");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("UNKNOW EXCEPTION : " + e.Message);
+        }
+    }
+
+    private static async Task DeprovisionAsync(CoreProvider serverProvider, SyncSetup setup, SyncOptions options)
+    {
+
+        var snapshotProgress = new SynchronousProgress<ProgressArgs>(pa =>
+        {
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine($"{pa.ProgressPercentage:p}\t {pa.Message}");
+            Console.ResetColor();
+        });
+
+        Console.WriteLine($"Deprovision ");
+
+        var remoteOrchestrator = new RemoteOrchestrator(serverProvider, options, setup);
+
+        try
+        {
+            Stopwatch stopw = new Stopwatch();
+            stopw.Start();
+
+            await remoteOrchestrator.DeprovisionAsync(progress: snapshotProgress);
+
+            stopw.Stop();
+            Console.WriteLine($"Total duration :{stopw.Elapsed:hh\\.mm\\:ss\\.fff}");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("UNKNOW EXCEPTION : " + e.Message);
+        }
+    }
+
+    private static async Task CreateSnapshotAsync(CoreProvider serverProvider, SyncSetup setup, SyncOptions options)
+    {
         var snapshotProgress = new SynchronousProgress<ProgressArgs>(pa =>
         {
             Console.ForegroundColor = ConsoleColor.Blue;
@@ -414,7 +461,7 @@ internal class Program
 
     }
 
- 
+
     private static async Task UpdateSetupAndProvisionAsync()
     {
         // [Required]: Get a connection string to your server data source
