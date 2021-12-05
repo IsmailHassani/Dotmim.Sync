@@ -22,7 +22,6 @@ using Dotmim.Sync.MySql;
 using System.Linq;
 using Microsoft.Data.SqlClient;
 using Dotmim.Sync.MariaDB;
-using MySqlConnector;
 #if NET5_0 || NET6_0
 using MySqlConnector;
 #elif NETSTANDARD
@@ -85,9 +84,9 @@ internal class Program
 
     private static async Task Main(string[] args)
     {
-        var serverProvider = new MariaDBSyncProvider(DBHelper.GetConnectionString("RegieProStaging"));
-        var clientProvider = new MariaDBSyncDownloadOnlyProvider(DBHelper.GetMariadbDatabaseConnectionString("Client2"));
-        var setup = new SyncSetup(regipro_tables)
+        var serverProvider = new MariaDBSyncProvider(DBHelper.GetMariadbDatabaseConnectionString(serverDbName));
+        var clientProvider = new MariaDBSyncDownloadOnlyProvider(DBHelper.GetMariadbDatabaseConnectionString(clientDbName));
+        var setup = new SyncSetup(allTables)
         {
             TrackingTablesPrefix = "_sync_",
             TrackingTablesSuffix = ""
@@ -95,14 +94,14 @@ internal class Program
         var snapshotDirectory = Path.Combine("C:\\Tmp\\SnapshotsAdv");
         var options = new SyncOptions() { SnapshotsDirectory = snapshotDirectory };
 
-        //var serverProvider = new SqlSyncProvider(DBHelper.GetDatabaseConnectionString(serverDbName));
-        //var clientProvider = new SqlSyncProvider(DBHelper.GetDatabaseConnectionString(clientDbName));
-        //var setup = new SyncSetup(allTables);
-        //var snapshotDirectory = Path.Combine("C:\\Tmp\\Snapshots");
-        //var options = new SyncOptions() { BatchSize = 100, SnapshotsDirectory = snapshotDirectory };
+        // var serverProvider = new SqlSyncProvider(DBHelper.GetDatabaseConnectionString(serverDbName));
+        // var clientProvider = new SqlSyncProvider(DBHelper.GetDatabaseConnectionString(clientDbName));
+        // var setup = new SyncSetup(allTables);
+        // var snapshotDirectory = Path.Combine("C:\\Tmp\\Snapshots");
+        // var options = new SyncOptions() { BatchSize = 100, SnapshotsDirectory = snapshotDirectory };
 
-        await DeprovisionAsync(serverProvider, setup, options);
-        await CreateSnapshotAsync(serverProvider, setup, options);
+        // await DeprovisionAsync(serverProvider, setup, options);
+        // await CreateSnapshotAsync(serverProvider, setup, options);
         await SynchronizeAsync(clientProvider, serverProvider, setup, options);
 
         //var localOrchestrator = new LocalOrchestrator(clientProvider, options, setup);
@@ -130,7 +129,7 @@ internal class Program
             Console.WriteLine("Sync start");
             try
             {
-                var s = await agent.SynchronizeAsync(progress);
+                var s = await agent.SynchronizeAsync(SyncType.Reinitialize, progress);
                 Console.WriteLine(s);
             }
             catch (SyncException e)
